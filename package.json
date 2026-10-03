@@ -1,0 +1,20 @@
+{
+  "name": "site-safety-forms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-first construction crew safety checklist and photo logging application",
+  "scripts": {
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "build:client": "npm --prefix client run build"
+  },
+  "keywords": [
+    "construction-safety",
+    "react",
+    "express",
+    "supabase",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "ISC"
+}
