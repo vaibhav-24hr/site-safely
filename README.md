@@ -113,11 +113,12 @@ npm install
 ### 4. Run the Development Servers
 From the root directory:
 ```bash
-# Run backend server (http://localhost:5000)
-npm run server
+# Run BOTH backend and frontend concurrently:
+npm run dev
 
-# Run frontend dev server (http://localhost:5173)
-npm run client
+# Or run them in separate terminals:
+npm run server   # Express API (http://localhost:5000)
+npm run client   # React Vite App (http://localhost:5173)
 ```
 
 ---
