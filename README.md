@@ -1,71 +1,87 @@
-# ⛑️ Site Safety Forms
+# Site Safety Forms
 
 > **Construction Crew Safety & Photo Log** — A mobile-first full-stack web application designed for construction companies to manage daily safety inspections completed by field workers before commencing work at job sites.
 
 ---
 
-## 🏗️ The Problem It Solves
+## Live Deployment & Demo Credentials
+
+* **Web Application:** [https://site-safety-psi.vercel.app](https://site-safety-psi.vercel.app)
+* **REST API Health:** [https://site-safely-api.onrender.com/api/health](https://site-safely-api.onrender.com/api/health)
+
+### Demo Accounts
+
+| Role | Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@sitesafety.com` | `demo1234` | Full metrics dashboard, site filters, missing worker tracking |
+| **Worker** | `john@sitesafety.com` | `demo1234` | Daily checklist submission, photo upload, personal history |
+
+---
+
+## The Problem It Solves
 
 Construction teams frequently struggle with fragmented paper safety forms, unorganized text messages, and lost condition photos. **Site Safety Forms** replaces manual paperwork with a centralized digital system:
 
-- **Workers** quickly verify PPE, identify hazards, upload site condition photos directly from mobile devices, and submit their daily inspection in under two minutes.
-- **Admins** review submissions in real-time, filter by job site, worker, or date, and immediately identify workers who have not completed their mandatory daily safety submission.
+* **Workers** quickly verify PPE compliance, identify hazards, upload site condition photos directly from mobile devices, and submit their daily inspection in under two minutes.
+* **Admins** review submissions in real-time, filter by job site, worker, or date, and immediately identify workers who have not completed their mandatory daily safety submission.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-| Layer              | Technology                          | Rationale                                                            |
-| ------------------ | ----------------------------------- | -------------------------------------------------------------------- |
-| **Frontend**       | React, JavaScript, Vite             | Fast client-side rendering, component-driven architecture            |
-| **Styling**        | Vanilla CSS                         | Custom properties, component-scoped styles, no framework dependency  |
-| **Backend**        | Node.js, Express.js                 | Structured REST API with layered separation of concerns              |
-| **Database**       | PostgreSQL (via Supabase)           | Relational integrity with foreign keys, constraints, and SQL queries |
-| **Authentication** | Supabase Auth                       | Secure email/password authentication with JWT verification           |
-| **Storage**        | Supabase Storage                    | Secure object storage for site inspection photos                     |
-| **Hosting**        | Vercel (Frontend), Render (Backend) | Independent deployment and production CI/CD pipelines                |
+| Layer | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Frontend** | React 19, JavaScript, Vite | Fast client-side rendering, component-driven architecture |
+| **Styling** | Vanilla CSS | Custom properties, responsive mobile design, no framework lock-in |
+| **Backend** | Node.js, Express.js | Structured REST API with layered separation of concerns |
+| **Database** | PostgreSQL (via Supabase) | Relational integrity with foreign keys, constraints, and RLS policies |
+| **Authentication** | Supabase Auth | Secure email/password authentication with JWT token verification |
+| **Storage** | Supabase Storage | Object storage bucket for site inspection photos |
+| **Hosting** | Vercel (Frontend), Render (Backend) | Independent production deployment and CI/CD pipelines |
 
 ---
 
-## 📐 Architecture Overview
+## Architecture Overview
 
 ```
 Browser (React Client)
    │
-   ▼ HTTP / REST
+   ▼ HTTP / REST (JWT Bearer Token)
 Express.js REST API
-   ├── Routes      (URL mapping & middleware mounting)
+   ├── Routes      (URL mapping & middleware execution)
    ├── Controllers (Request parsing & response dispatching)
-   ├── Services    (Business rules & validation logic)
-   └── DB Layer    (SQL queries & data access)
+   ├── Services    (Business logic & authorization rules)
+   └── DB Layer    (Supabase client & SQL execution)
    │
    ▼
 PostgreSQL & Supabase Storage
 ```
 
-> **Entity-Relationship Diagram (ERD):** [View the full database schema and ERD here](ERD.md).
+* **Entity-Relationship Diagram (ERD):** [View the full database schema and ERD here](ERD.md).
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 site-safety-forms/
 ├── client/          # React frontend (Vite + Vanilla CSS)
 │   ├── src/
-│   │   ├── components/  # Reusable UI elements (Navbar, Button, WorkerDashboard, etc.)
+│   │   ├── components/  # Reusable UI elements (Navbar, ErrorBoundary, WorkerDashboard)
 │   │   ├── context/     # AuthContext state management
 │   │   ├── lib/         # Supabase client initialization
-│   │   ├── pages/       # Views (Dashboard, SafetyForm, SubmissionDetails, Login)
+│   │   ├── pages/       # Application views (Dashboard, SafetyForm, SubmissionDetails, Login)
 │   │   └── services/    # Axios API client functions
+│   ├── vercel.json      # Production SPA routing configuration
 │   └── package.json
 │
 ├── server/          # Express.js REST API
 │   ├── routes/          # API route definitions
 │   ├── controllers/     # Request handlers
 │   ├── services/        # Business logic layer
-│   ├── middleware/      # Auth, authorization, validation, error handling
-│   ├── db/              # Database connection & query modules
+│   ├── middleware/      # Auth, authorization, validation, file upload
+│   ├── db/              # Database connection & schema scripts
+│   ├── scripts/         # Automated seed and demo provisioning scripts
 │   └── server.js        # Server entry point
 │
 ├── .gitignore       # Production gitignore
@@ -75,13 +91,39 @@ site-safety-forms/
 
 ---
 
-## 🚀 Getting Started Locally
+## Safety Inspection Checklist
+
+The standardized safety checklist validates 8 essential site safety standards:
+
+1. Hard hat worn (PPE)
+2. High-visibility safety vest worn (PPE)
+3. Steel-toe work boots worn (PPE)
+4. Eye protection worn (PPE)
+5. Fall protection installed and secured
+6. Ladders and scaffolding inspected
+7. Tools and electrical cords in safe working condition
+8. Site inspected for undocumented hazards
+
+---
+
+## Security & Authorization
+
+* **Authentication:** Token-based authentication using Supabase JWTs attached via custom Axios request interceptors.
+* **Role-Based Access Control:**
+  * `framer` (Worker): Can only submit new assessments and view their own past submissions.
+  * `admin`: Complete visibility across all sites, aggregated analytics, multi-factor filtering, and missing worker tracking.
+* **Row-Level Security (RLS):** PostgreSQL policies guarantee data isolation directly at the database engine level.
+* **Server-Side Validation:** Rigid verification of required boolean checklist fields, site active status, and image file types.
+
+---
+
+## Local Development Setup
 
 ### Prerequisites
 
-- **Node.js** (v18.0.0 or higher)
-- **npm** (v9.0.0 or higher)
-- A free **Supabase** project account (for PostgreSQL, Auth, and Storage)
+* **Node.js** (v18.0.0 or higher)
+* **npm** (v9.0.0 or higher)
+* A **Supabase** project account (for PostgreSQL, Auth, and Storage)
 
 ### 1. Clone the Repository
 
@@ -98,7 +140,13 @@ cd site-safety-forms
 cp server/.env.example server/.env
 ```
 
-Fill in your Supabase project URL and service/anon keys.
+Fill in your Supabase project URL and keys:
+* `PORT=5000`
+* `NODE_ENV=development`
+* `CLIENT_ORIGIN=http://localhost:5173`
+* `SUPABASE_URL=https://your-project-id.supabase.co`
+* `SUPABASE_ANON_KEY=your-supabase-anon-key`
+* `SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key`
 
 **Frontend (`client/.env`):**
 
@@ -106,18 +154,19 @@ Fill in your Supabase project URL and service/anon keys.
 cp client/.env.example client/.env
 ```
 
-Fill in your backend API URL and Supabase public credentials.
+Fill in your client settings:
+* `VITE_API_URL=http://localhost:5000/api`
+* `VITE_SUPABASE_URL=https://your-project-id.supabase.co`
+* `VITE_SUPABASE_ANON_KEY=your-supabase-anon-key`
+* `VITE_SUPABASE_PROJECT_ID=your-project-id`
 
 ### 3. Install Dependencies
 
 ```bash
-# Install server dependencies
-cd server
+# Install root, server, and client dependencies
 npm install
-
-# Install client dependencies
-cd ../client
-npm install
+npm --prefix server install
+npm --prefix client install
 ```
 
 ### 4. Run the Development Servers
@@ -125,41 +174,16 @@ npm install
 From the root directory:
 
 ```bash
-# Run BOTH backend and frontend concurrently:
+# Run both backend and frontend concurrently:
 npm run dev
 
-# Or run them in separate terminals:
+# Or in separate terminals:
 npm run server   # Express API (http://localhost:5000)
 npm run client   # React Vite App (http://localhost:5173)
 ```
 
 ---
 
-## 📋 Key Safety Checklist Items
-
-The fixed safety checklist validates 8 essential site safety standards:
-
-1. 🦺 Hard hat worn
-2. 🦺 Safety vest worn
-3. 🥾 Safety boots worn
-4. 🥽 Eye protection worn
-5. 🧗 Fall protection in place
-6. 🪜 Ladders & scaffolding inspected
-7. 🔌 Tools and electrical cords in good condition
-8. ⚠️ Site hazards identified
-
----
-
-## 🔒 Security & Authorization
-
-- **Authentication**: Token-based authentication using Supabase JWTs.
-- **Role-Based Access Control**:
-  - `framer` (Worker): Can only create submissions and view their own past forms.
-  - `admin`: Access to aggregate metrics, multi-factor filters, and missing worker tracking.
-- **Server-side Validation**: Strict verification of required fields, boolean values, and photo file properties.
-
----
-
-## 📄 License
+## License
 
 ISC

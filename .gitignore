@@ -30,6 +30,7 @@ lerna-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+.vercel
 
 # Internal Project Docs (Local only - not pushed to GitHub)
 docs/
