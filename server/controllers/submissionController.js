@@ -3,7 +3,7 @@ const submissionService = require('../services/submissionService');
 class SubmissionController {
   async createSubmission(req, res, next) {
     try {
-      const submission = await submissionService.createSubmission(req.user.id, req.body);
+      const submission = await submissionService.createSubmission(req.user.id, req.body, req.files);
       res.status(201).json(submission);
     } catch (error) {
       next(error);
@@ -27,6 +27,33 @@ class SubmissionController {
         req.user.role
       );
       res.status(200).json(submission);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateSubmission(req, res, next) {
+    try {
+      const submission = await submissionService.updateSubmission(
+        req.params.id,
+        req.user.id,
+        req.user.role,
+        req.body
+      );
+      res.status(200).json(submission);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteSubmission(req, res, next) {
+    try {
+      await submissionService.deleteSubmission(
+        req.params.id,
+        req.user.id,
+        req.user.role
+      );
+      res.status(200).json({ success: true });
     } catch (error) {
       next(error);
     }

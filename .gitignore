@@ -16,6 +16,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+client/.env
 
 # Debug logs
 npm-debug.log*
@@ -35,3 +36,6 @@ docs/
 
 # Agent/IDE internals
 .agents/
+data*piplint.txt
+*.txt
+

@@ -1,18 +1,61 @@
-export default function App() {
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/layout/ErrorBoundary';
+import Navbar from './components/layout/Navbar';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+import Login from './pages/Login';
+import WorkerDashboard from './components/worker/WorkerDashboard';
+import SafetyForm from './pages/SafetyForm';
+import SubmissionDetails from './pages/SubmissionDetails';
+import Dashboard from './pages/Dashboard';
+import Unauthorized from './pages/Unauthorized';
+import NotFound from './pages/NotFound';
+import { useAuth } from './context/AuthContext';
+
+const AppLayout = ({ children }) => (
+  <>
+    <Navbar />
+    <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {children}
+    </main>
+  </>
+);
+
+const RootRedirect = () => {
+  const { role } = useAuth();
+  if (role === 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <AppLayout><WorkerDashboard /></AppLayout>;
+};
+
+function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-6 text-center">
-      <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full border border-slate-200">
-        <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow">
-          ⛑️
-        </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Site Safety Forms</h1>
-        <p className="text-slate-600 text-sm mb-6">
-          Construction Crew Safety & Photo Log Management
-        </p>
-        <div className="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
-          Phase 2 Initialized
-        </div>
-      </div>
-    </div>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/submit" element={<AppLayout><SafetyForm /></AppLayout>} />
+              <Route path="/submissions/:id" element={<AppLayout><SubmissionDetails /></AppLayout>} />
+            </Route>
+            
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
+            </Route>
+            
+            {/* 404 Catch All */}
+            <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
+
+export default App;

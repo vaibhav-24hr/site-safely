@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.sites (
 );
 
 -- 3. USER_SITES TABLE (Worker Site Assignment)
--- Associates workers with assigned sites so supervisors can track missing submissions
+-- Associates workers with assigned sites so administrators can track missing submissions
 CREATE TABLE IF NOT EXISTS public.user_sites (
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     site_id UUID NOT NULL REFERENCES public.sites(id) ON DELETE CASCADE,

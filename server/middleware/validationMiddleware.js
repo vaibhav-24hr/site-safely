@@ -24,14 +24,23 @@ function validateSubmission(req, res, next) {
   ];
 
   for (const field of checklistFields) {
-    if (req.body[field] === undefined || req.body[field] === null) {
+    let val = req.body[field];
+
+    // Convert string 'true'/'false' from FormData back to boolean
+    if (val === 'true') val = true;
+    if (val === 'false') val = false;
+    
+    // Write back to req.body so controllers have the boolean value
+    req.body[field] = val;
+
+    if (val === undefined || val === null) {
       return res.status(400).json({
         error: `Checklist item '${field}' is required and must be a boolean`,
         status: 400
       });
     }
 
-    if (typeof req.body[field] !== 'boolean') {
+    if (typeof val !== 'boolean') {
       return res.status(400).json({
         error: `Field '${field}' must be a boolean (true or false)`,
         status: 400

@@ -2,7 +2,7 @@ const { supabaseAdmin } = require('../db/supabaseClient');
 
 /**
  * Admin Service
- * Business logic for supervisor dashboard, analytics, multi-factor filtering,
+ * Business logic for admin dashboard, analytics, multi-factor filtering,
  * and tracking workers who haven't completed their daily safety form.
  */
 class AdminService {
@@ -119,6 +119,7 @@ class AdminService {
       ladders_scaffolding: sub.ladders_scaffolding,
       tools_cords: sub.tools_cords,
       hazards_identified: sub.hazards_identified,
+      all_safe: Boolean(sub.ppe_hard_hat && sub.ppe_vest && sub.ppe_boots && sub.ppe_eye_protection && sub.fall_protection && sub.ladders_scaffolding && sub.tools_cords && sub.hazards_identified),
       notes: sub.notes,
       photo_count: sub.photos ? sub.photos.length : 0
     }));
@@ -145,7 +146,10 @@ class AdminService {
       throw notFound;
     }
 
-    return submission;
+    return {
+      ...submission,
+      all_safe: Boolean(submission.ppe_hard_hat && submission.ppe_vest && submission.ppe_boots && submission.ppe_eye_protection && submission.fall_protection && submission.ladders_scaffolding && submission.tools_cords && submission.hazards_identified)
+    };
   }
 
   /**

@@ -7,22 +7,23 @@
 ## 🏗️ The Problem It Solves
 
 Construction teams frequently struggle with fragmented paper safety forms, unorganized text messages, and lost condition photos. **Site Safety Forms** replaces manual paperwork with a centralized digital system:
-* **Workers** quickly verify PPE, identify hazards, upload site condition photos directly from mobile devices, and submit their daily inspection in under two minutes.
-* **Supervisors** review submissions in real-time, filter by job site, worker, or date, and immediately identify workers who have not completed their mandatory daily safety submission.
+
+- **Workers** quickly verify PPE, identify hazards, upload site condition photos directly from mobile devices, and submit their daily inspection in under two minutes.
+- **Admins** review submissions in real-time, filter by job site, worker, or date, and immediately identify workers who have not completed their mandatory daily safety submission.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Rationale |
-|---|---|---|
-| **Frontend** | React, JavaScript, Vite | Fast client-side rendering, component-driven architecture |
-| **Styling** | Tailwind CSS | Mobile-first utility design with consistent ergonomics |
-| **Backend** | Node.js, Express.js | Structured REST API with layered separation of concerns |
-| **Database** | PostgreSQL (via Supabase) | Relational integrity with foreign keys, constraints, and SQL queries |
-| **Authentication** | Supabase Auth | Secure email/password authentication with JWT verification |
-| **Storage** | Supabase Storage | Secure object storage for site inspection photos |
-| **Hosting** | Vercel (Frontend), Render (Backend) | Independent deployment and production CI/CD pipelines |
+| Layer              | Technology                          | Rationale                                                            |
+| ------------------ | ----------------------------------- | -------------------------------------------------------------------- |
+| **Frontend**       | React, JavaScript, Vite             | Fast client-side rendering, component-driven architecture            |
+| **Styling**        | Vanilla CSS                         | Custom properties, component-scoped styles, no framework dependency  |
+| **Backend**        | Node.js, Express.js                 | Structured REST API with layered separation of concerns              |
+| **Database**       | PostgreSQL (via Supabase)           | Relational integrity with foreign keys, constraints, and SQL queries |
+| **Authentication** | Supabase Auth                       | Secure email/password authentication with JWT verification           |
+| **Storage**        | Supabase Storage                    | Secure object storage for site inspection photos                     |
+| **Hosting**        | Vercel (Frontend), Render (Backend) | Independent deployment and production CI/CD pipelines                |
 
 ---
 
@@ -42,19 +43,21 @@ Express.js REST API
 PostgreSQL & Supabase Storage
 ```
 
+> **Entity-Relationship Diagram (ERD):** [View the full database schema and ERD here](ERD.md).
+
 ---
 
 ## 📂 Repository Structure
 
 ```
 site-safety-forms/
-├── client/          # React frontend (Vite + Tailwind CSS)
+├── client/          # React frontend (Vite + Vanilla CSS)
 │   ├── src/
-│   │   ├── components/  # Reusable UI elements (Navbar, Button, Loading, etc.)
-│   │   ├── pages/       # Application views (Worker & Admin dashboards, Forms)
-│   │   ├── services/    # API client functions
-│   │   ├── hooks/       # Custom React hooks
-│   │   └── utils/       # Utility helpers
+│   │   ├── components/  # Reusable UI elements (Navbar, Button, WorkerDashboard, etc.)
+│   │   ├── context/     # AuthContext state management
+│   │   ├── lib/         # Supabase client initialization
+│   │   ├── pages/       # Views (Dashboard, SafetyForm, SubmissionDetails, Login)
+│   │   └── services/    # Axios API client functions
 │   └── package.json
 │
 ├── server/          # Express.js REST API
@@ -75,31 +78,38 @@ site-safety-forms/
 ## 🚀 Getting Started Locally
 
 ### Prerequisites
-* **Node.js** (v18.0.0 or higher)
-* **npm** (v9.0.0 or higher)
-* A free **Supabase** project account (for PostgreSQL, Auth, and Storage)
+
+- **Node.js** (v18.0.0 or higher)
+- **npm** (v9.0.0 or higher)
+- A free **Supabase** project account (for PostgreSQL, Auth, and Storage)
 
 ### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/your-username/site-safety-forms.git
+git clone https://github.com/vaibhav-24hr/site-safety-forms.git
 cd site-safety-forms
 ```
 
 ### 2. Configure Environment Variables
 
 **Backend (`server/.env`):**
+
 ```bash
 cp server/.env.example server/.env
 ```
+
 Fill in your Supabase project URL and service/anon keys.
 
 **Frontend (`client/.env`):**
+
 ```bash
 cp client/.env.example client/.env
 ```
+
 Fill in your backend API URL and Supabase public credentials.
 
 ### 3. Install Dependencies
+
 ```bash
 # Install server dependencies
 cd server
@@ -111,7 +121,9 @@ npm install
 ```
 
 ### 4. Run the Development Servers
+
 From the root directory:
+
 ```bash
 # Run BOTH backend and frontend concurrently:
 npm run dev
@@ -126,6 +138,7 @@ npm run client   # React Vite App (http://localhost:5173)
 ## 📋 Key Safety Checklist Items
 
 The fixed safety checklist validates 8 essential site safety standards:
+
 1. 🦺 Hard hat worn
 2. 🦺 Safety vest worn
 3. 🥾 Safety boots worn
@@ -139,13 +152,14 @@ The fixed safety checklist validates 8 essential site safety standards:
 
 ## 🔒 Security & Authorization
 
-* **Authentication**: Token-based authentication using Supabase JWTs.
-* **Role-Based Access Control**:
-  * `framer`: Can only create submissions and view their own past forms.
-  * `admin`: Access to aggregate metrics, multi-factor filters, and missing worker tracking.
-* **Server-side Validation**: Strict verification of required fields, boolean values, and photo file properties.
+- **Authentication**: Token-based authentication using Supabase JWTs.
+- **Role-Based Access Control**:
+  - `framer` (Worker): Can only create submissions and view their own past forms.
+  - `admin`: Access to aggregate metrics, multi-factor filters, and missing worker tracking.
+- **Server-side Validation**: Strict verification of required fields, boolean values, and photo file properties.
 
 ---
 
 ## 📄 License
+
 ISC

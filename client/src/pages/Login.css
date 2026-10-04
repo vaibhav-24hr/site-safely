@@ -1,0 +1,72 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-ras-black);
+  padding: var(--spacing-4);
+  background-image: linear-gradient(rgba(15, 61, 42, 0.6), rgba(24, 24, 27, 0.8)), url('/construction-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.login-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 400px;
+  padding: var(--spacing-8);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.login-logo {
+  height: 60px;
+  width: 100%;
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-ras-green);
+  -webkit-mask-image: url('/ras-logo.png');
+  mask-image: url('/ras-logo.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.login-title {
+  color: var(--color-ras-black);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.login-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.login-error {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-4);
+  font-size: 0.875rem;
+  text-align: center;
+  border: 1px solid #f87171;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: var(--spacing-2);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
