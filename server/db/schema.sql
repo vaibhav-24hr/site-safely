@@ -1,6 +1,5 @@
 -- ==============================================================================
 -- Site Safety Forms — Database Schema
--- Run this script in the Supabase SQL Editor
 -- ==============================================================================
 
 -- Enable UUID extension if not already enabled
