@@ -1,9 +1,13 @@
-const submissionService = require('../services/submissionService');
+const submissionService = require("../services/submissionService");
 
 class SubmissionController {
   async createSubmission(req, res, next) {
     try {
-      const submission = await submissionService.createSubmission(req.user.id, req.body, req.files);
+      const submission = await submissionService.createSubmission(
+        req.user.id,
+        req.body,
+        req.files,
+      );
       res.status(201).json(submission);
     } catch (error) {
       next(error);
@@ -12,7 +16,9 @@ class SubmissionController {
 
   async getMySubmissions(req, res, next) {
     try {
-      const submissions = await submissionService.getWorkerSubmissions(req.user.id);
+      const submissions = await submissionService.getWorkerSubmissions(
+        req.user.id,
+      );
       res.status(200).json({ submissions });
     } catch (error) {
       next(error);
@@ -24,7 +30,7 @@ class SubmissionController {
       const submission = await submissionService.getSubmissionById(
         req.params.id,
         req.user.id,
-        req.user.role
+        req.user.role,
       );
       res.status(200).json(submission);
     } catch (error) {
@@ -38,7 +44,7 @@ class SubmissionController {
         req.params.id,
         req.user.id,
         req.user.role,
-        req.body
+        req.body,
       );
       res.status(200).json(submission);
     } catch (error) {
@@ -51,7 +57,7 @@ class SubmissionController {
       await submissionService.deleteSubmission(
         req.params.id,
         req.user.id,
-        req.user.role
+        req.user.role,
       );
       res.status(200).json({ success: true });
     } catch (error) {

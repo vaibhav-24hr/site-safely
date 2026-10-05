@@ -1,4 +1,4 @@
-const { supabaseAdmin } = require('../db/supabaseClient');
+const { supabaseAdmin } = require("../db/supabaseClient");
 
 /**
  * Site Service
@@ -10,14 +10,14 @@ class SiteService {
    */
   async getActiveSites() {
     const { data: sites, error } = await supabaseAdmin
-      .from('sites')
-      .select('id, name, address, active, created_at')
-      .eq('active', true)
-      .order('name', { ascending: true });
+      .from("sites")
+      .select("id, name, address, active, created_at")
+      .eq("active", true)
+      .order("name", { ascending: true });
 
     if (error) {
-      console.error('Error fetching sites:', error);
-      const err = new Error('Failed to retrieve job sites');
+      console.error("Error fetching sites:", error);
+      const err = new Error("Failed to retrieve job sites");
       err.status = 500;
       throw err;
     }

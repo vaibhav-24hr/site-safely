@@ -1,4 +1,4 @@
-const { supabaseAdmin } = require('../db/supabaseClient');
+const { supabaseAdmin } = require("../db/supabaseClient");
 
 /**
  * Authentication Middleware
@@ -8,22 +8,23 @@ const { supabaseAdmin } = require('../db/supabaseClient');
 async function authMiddleware(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        error: 'Authentication token missing or invalid',
-        status: 401
+        error: "Authentication token missing or invalid",
+        status: 401,
       });
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
 
     // Verify token with Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.getUser(token);
 
     if (authError || !authData.user) {
       return res.status(401).json({
-        error: 'Invalid or expired session token',
-        status: 401
+        error: "Invalid or expired session token",
+        status: 401,
       });
     }
 
@@ -31,23 +32,23 @@ async function authMiddleware(req, res, next) {
 
     // Fetch user profile & role from public.users
     const { data: profile, error: profileError } = await supabaseAdmin
-      .from('users')
-      .select('id, email, full_name, role')
-      .eq('id', authUser.id)
+      .from("users")
+      .select("id, email, full_name, role")
+      .eq("id", authUser.id)
       .single();
 
     if (profileError || !profile) {
       // Fallback: If trigger hasn't fired yet, create or extract from user_metadata
-      const role = authUser.user_metadata?.role || 'framer';
-      const fullName = authUser.user_metadata?.full_name || 'Worker';
+      const role = authUser.user_metadata?.role || "framer";
+      const fullName = authUser.user_metadata?.full_name || "Worker";
 
       const { data: newProfile } = await supabaseAdmin
-        .from('users')
+        .from("users")
         .upsert({
           id: authUser.id,
           email: authUser.email,
           full_name: fullName,
-          role: role
+          role: role,
         })
         .select()
         .single();
@@ -56,7 +57,7 @@ async function authMiddleware(req, res, next) {
         id: authUser.id,
         email: authUser.email,
         full_name: fullName,
-        role: role
+        role: role,
       };
     } else {
       req.user = profile;
@@ -64,10 +65,10 @@ async function authMiddleware(req, res, next) {
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    console.error("Auth middleware error:", error);
     return res.status(500).json({
-      error: 'Internal authentication error',
-      status: 500
+      error: "Internal authentication error",
+      status: 500,
     });
   }
 }
@@ -77,10 +78,10 @@ async function authMiddleware(req, res, next) {
  * Restricts access to users with the 'admin' role.
  */
 function adminMiddleware(req, res, next) {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
-      error: 'Forbidden: Administrator privileges required',
-      status: 403
+      error: "Forbidden: Administrator privileges required",
+      status: 403,
     });
   }
   next();
@@ -88,5 +89,5 @@ function adminMiddleware(req, res, next) {
 
 module.exports = {
   authMiddleware,
-  adminMiddleware
+  adminMiddleware,
 };

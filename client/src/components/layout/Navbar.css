@@ -2,7 +2,7 @@
   background-color: var(--color-ras-green);
   color: white;
   padding: var(--spacing-3) 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -60,7 +60,7 @@
   align-items: center;
   gap: var(--spacing-2);
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-md);
@@ -78,9 +78,11 @@
   .logout-text {
     display: none;
   }
+
   .navbar-user {
     display: none;
   }
+
   .btn-logout {
     padding: var(--spacing-2);
   }

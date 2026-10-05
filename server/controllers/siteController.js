@@ -1,4 +1,4 @@
-const siteService = require('../services/siteService');
+const siteService = require("../services/siteService");
 
 class SiteController {
   async getSites(req, res, next) {

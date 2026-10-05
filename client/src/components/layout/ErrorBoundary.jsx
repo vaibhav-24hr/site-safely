@@ -1,5 +1,5 @@
-import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import React from "react";
+import { AlertTriangle } from "lucide-react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -20,13 +20,30 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', textAlign: 'center' }}>
-          <AlertTriangle size={48} color="var(--color-ras-orange)" style={{ marginBottom: '1rem' }} />
-          <h2 style={{ color: 'var(--color-ras-black)' }}>Something went wrong.</h2>
-          <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-            An unexpected error occurred in the application. Please refresh the page.
+        <div
+          className="container"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "80vh",
+            textAlign: "center",
+          }}
+        >
+          <AlertTriangle
+            size={48}
+            color="var(--color-ras-orange)"
+            style={{ marginBottom: "1rem" }}
+          />
+          <h2 style={{ color: "var(--color-ras-black)" }}>
+            Something went wrong.
+          </h2>
+          <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
+            An unexpected error occurred in the application. Please refresh the
+            page.
           </p>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => window.location.reload()}
           >
@@ -36,7 +53,7 @@ class ErrorBoundary extends React.Component {
       );
     }
 
-    return this.props.children; 
+    return this.props.children;
   }
 }
 

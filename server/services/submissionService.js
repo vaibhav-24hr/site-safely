@@ -1,4 +1,4 @@
-const { supabaseAdmin } = require('../db/supabaseClient');
+const { supabaseAdmin } = require("../db/supabaseClient");
 
 /**
  * Submission Service
@@ -19,62 +19,69 @@ class SubmissionService {
       ladders_scaffolding,
       tools_cords,
       hazards_identified,
-      notes
+      notes,
     } = submissionData;
 
     // Verify site exists and is active
     const { data: site, error: siteError } = await supabaseAdmin
-      .from('sites')
-      .select('id, name')
-      .eq('id', site_id)
-      .eq('active', true)
+      .from("sites")
+      .select("id, name")
+      .eq("id", site_id)
+      .eq("active", true)
       .single();
 
     if (siteError || !site) {
-      const err = new Error('Selected job site does not exist or is inactive');
+      const err = new Error("Selected job site does not exist or is inactive");
       err.status = 400;
       throw err;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
 
     // Insert safety submission (booleans already parsed by validationMiddleware)
-      const { data: submission, error: subError } = await supabaseAdmin
-        .from('submissions')
-        .insert({
-          user_id: userId,
-          site_id: site_id,
-          submission_date: today,
-          ppe_hard_hat: Boolean(ppe_hard_hat),
-          ppe_vest: Boolean(ppe_vest),
-          ppe_boots: Boolean(ppe_boots),
-          ppe_eye_protection: Boolean(ppe_eye_protection),
-          fall_protection: Boolean(fall_protection),
-          ladders_scaffolding: Boolean(ladders_scaffolding),
-          tools_cords: Boolean(tools_cords),
-          hazards_identified: Boolean(hazards_identified),
-          notes: notes ? notes.trim() : null
-        })
-      .select(`
+    const { data: submission, error: subError } = await supabaseAdmin
+      .from("submissions")
+      .insert({
+        user_id: userId,
+        site_id: site_id,
+        submission_date: today,
+        ppe_hard_hat: Boolean(ppe_hard_hat),
+        ppe_vest: Boolean(ppe_vest),
+        ppe_boots: Boolean(ppe_boots),
+        ppe_eye_protection: Boolean(ppe_eye_protection),
+        fall_protection: Boolean(fall_protection),
+        ladders_scaffolding: Boolean(ladders_scaffolding),
+        tools_cords: Boolean(tools_cords),
+        hazards_identified: Boolean(hazards_identified),
+        notes: notes ? notes.trim() : null,
+      })
+      .select(
+        `
         *,
         site:sites(id, name, address)
-      `)
+      `,
+      )
       .single();
 
     if (subError) {
-      console.error('Submission creation error:', subError);
-      const err = new Error(subError.message || 'Failed to record safety submission');
+      console.error("Submission creation error:", subError);
+      const err = new Error(
+        subError.message || "Failed to record safety submission",
+      );
       err.status = 500;
       throw err;
     }
 
     // Ensure worker is registered in user_sites for this site
     const { error: userSiteError } = await supabaseAdmin
-      .from('user_sites')
+      .from("user_sites")
       .upsert({ user_id: userId, site_id: site_id });
 
     if (userSiteError) {
-      console.warn('Non-critical: user_site link skipped:', userSiteError.message);
+      console.warn(
+        "Non-critical: user_site link skipped:",
+        userSiteError.message,
+      );
     }
 
     // Handle photo uploads to Supabase Storage
@@ -82,26 +89,24 @@ class SubmissionService {
       const photoRecords = [];
       for (const file of files) {
         // Generate unique filename
-        const ext = file.originalname.split('.').pop() || 'jpg';
+        const ext = file.originalname.split(".").pop() || "jpg";
         const fileName = `${submission.id}/${Date.now()}-${Math.round(Math.random() * 1000)}.${ext}`;
-        
+
         // Upload to Supabase Storage
-        const { data, error: uploadError } = await supabaseAdmin
-          .storage
-          .from('safety-photos')
+        const { data, error: uploadError } = await supabaseAdmin.storage
+          .from("safety-photos")
           .upload(fileName, file.buffer, {
-            contentType: file.mimetype
+            contentType: file.mimetype,
           });
 
         if (uploadError) {
-          console.error('Failed to upload photo:', uploadError);
-          continue; 
+          console.error("Failed to upload photo:", uploadError);
+          continue;
         }
 
         // Get public URL
-        const { data: publicUrlData } = supabaseAdmin
-          .storage
-          .from('safety-photos')
+        const { data: publicUrlData } = supabaseAdmin.storage
+          .from("safety-photos")
           .getPublicUrl(fileName);
 
         photoRecords.push({
@@ -109,18 +114,18 @@ class SubmissionService {
           url: publicUrlData.publicUrl,
           file_name: file.originalname,
           file_type: file.mimetype,
-          file_size: file.size
+          file_size: file.size,
         });
       }
 
       // Insert records into photos table
       if (photoRecords.length > 0) {
         const { error: dbError } = await supabaseAdmin
-          .from('photos')
+          .from("photos")
           .insert(photoRecords);
-          
+
         if (dbError) {
-          console.error('Failed to save photo records to database:', dbError);
+          console.error("Failed to save photo records to database:", dbError);
         }
       }
     }
@@ -133,8 +138,9 @@ class SubmissionService {
    */
   async getWorkerSubmissions(userId) {
     const { data: submissions, error } = await supabaseAdmin
-      .from('submissions')
-      .select(`
+      .from("submissions")
+      .select(
+        `
         id,
         submission_date,
         ppe_hard_hat,
@@ -149,13 +155,14 @@ class SubmissionService {
         created_at,
         site:sites(id, name, address),
         photos(id)
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      `,
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching worker submissions:', error);
-      const err = new Error('Failed to retrieve your submissions');
+      console.error("Error fetching worker submissions:", error);
+      const err = new Error("Failed to retrieve your submissions");
       err.status = 500;
       throw err;
     }
@@ -163,9 +170,18 @@ class SubmissionService {
     // Format output with photo count
     return (submissions || []).map((sub) => ({
       ...sub,
-      site_name: sub.site?.name || 'Unknown Site',
+      site_name: sub.site?.name || "Unknown Site",
       photo_count: sub.photos ? sub.photos.length : 0,
-      all_safe: Boolean(sub.ppe_hard_hat && sub.ppe_vest && sub.ppe_boots && sub.ppe_eye_protection && sub.fall_protection && sub.ladders_scaffolding && sub.tools_cords && sub.hazards_identified)
+      all_safe: Boolean(
+        sub.ppe_hard_hat &&
+        sub.ppe_vest &&
+        sub.ppe_boots &&
+        sub.ppe_eye_protection &&
+        sub.fall_protection &&
+        sub.ladders_scaffolding &&
+        sub.tools_cords &&
+        sub.hazards_identified,
+      ),
     }));
   }
 
@@ -174,39 +190,52 @@ class SubmissionService {
    */
   async getSubmissionById(submissionId, requestingUserId, userRole) {
     const { data: submission, error } = await supabaseAdmin
-      .from('submissions')
-      .select(`
+      .from("submissions")
+      .select(
+        `
         *,
         worker:users(id, full_name, email, role),
         site:sites(id, name, address)
-      `)
-      .eq('id', submissionId)
+      `,
+      )
+      .eq("id", submissionId)
       .single();
 
     if (error || !submission) {
-      const notFound = new Error('Submission not found');
+      const notFound = new Error("Submission not found");
       notFound.status = 404;
       throw notFound;
     }
 
     // Enforce data isolation: Framers can ONLY view their own submission
-    if (userRole !== 'admin' && submission.user_id !== requestingUserId) {
-      const forbidden = new Error('Forbidden: You can only access your own safety submissions');
+    if (userRole !== "admin" && submission.user_id !== requestingUserId) {
+      const forbidden = new Error(
+        "Forbidden: You can only access your own safety submissions",
+      );
       forbidden.status = 403;
       throw forbidden;
     }
 
     // Retrieve attached photos
     const { data: photos } = await supabaseAdmin
-      .from('photos')
-      .select('id, url, file_name, file_type, file_size, created_at')
-      .eq('submission_id', submissionId)
-      .order('created_at', { ascending: true });
+      .from("photos")
+      .select("id, url, file_name, file_type, file_size, created_at")
+      .eq("submission_id", submissionId)
+      .order("created_at", { ascending: true });
 
     return {
       ...submission,
-      all_safe: Boolean(submission.ppe_hard_hat && submission.ppe_vest && submission.ppe_boots && submission.ppe_eye_protection && submission.fall_protection && submission.ladders_scaffolding && submission.tools_cords && submission.hazards_identified),
-      photos: photos || []
+      all_safe: Boolean(
+        submission.ppe_hard_hat &&
+        submission.ppe_vest &&
+        submission.ppe_boots &&
+        submission.ppe_eye_protection &&
+        submission.fall_protection &&
+        submission.ladders_scaffolding &&
+        submission.tools_cords &&
+        submission.hazards_identified,
+      ),
+      photos: photos || [],
     };
   }
 
@@ -215,32 +244,34 @@ class SubmissionService {
    */
   async deleteSubmission(submissionId, requestingUserId, userRole) {
     const { data: submission, error: fetchError } = await supabaseAdmin
-      .from('submissions')
-      .select('user_id')
-      .eq('id', submissionId)
+      .from("submissions")
+      .select("user_id")
+      .eq("id", submissionId)
       .single();
 
     if (fetchError || !submission) {
-      const notFound = new Error('Submission not found');
+      const notFound = new Error("Submission not found");
       notFound.status = 404;
       throw notFound;
     }
 
     // Admins can delete anything. Workers only their own.
-    const isAdmin = userRole === 'admin';
+    const isAdmin = userRole === "admin";
     if (!isAdmin && submission.user_id !== requestingUserId) {
-      const forbidden = new Error('Forbidden: You can only delete your own submissions');
+      const forbidden = new Error(
+        "Forbidden: You can only delete your own submissions",
+      );
       forbidden.status = 403;
       throw forbidden;
     }
 
     const { error: deleteError } = await supabaseAdmin
-      .from('submissions')
+      .from("submissions")
       .delete()
-      .eq('id', submissionId);
+      .eq("id", submissionId);
 
     if (deleteError) {
-      throw new Error('Failed to delete submission');
+      throw new Error("Failed to delete submission");
     }
     return { success: true };
   }
@@ -250,28 +281,36 @@ class SubmissionService {
    */
   async updateSubmission(submissionId, requestingUserId, userRole, updateData) {
     const { data: submission, error: fetchError } = await supabaseAdmin
-      .from('submissions')
-      .select('user_id')
-      .eq('id', submissionId)
+      .from("submissions")
+      .select("user_id")
+      .eq("id", submissionId)
       .single();
 
     if (fetchError || !submission) {
-      const notFound = new Error('Submission not found');
+      const notFound = new Error("Submission not found");
       notFound.status = 404;
       throw notFound;
     }
 
-    const isAdmin = userRole === 'admin';
+    const isAdmin = userRole === "admin";
     if (!isAdmin && submission.user_id !== requestingUserId) {
-      const forbidden = new Error('Forbidden: You can only update your own submissions');
+      const forbidden = new Error(
+        "Forbidden: You can only update your own submissions",
+      );
       forbidden.status = 403;
       throw forbidden;
     }
 
     const updates = {};
     const checklistFields = [
-      'ppe_hard_hat', 'ppe_vest', 'ppe_boots', 'ppe_eye_protection',
-      'fall_protection', 'ladders_scaffolding', 'tools_cords', 'hazards_identified'
+      "ppe_hard_hat",
+      "ppe_vest",
+      "ppe_boots",
+      "ppe_eye_protection",
+      "fall_protection",
+      "ladders_scaffolding",
+      "tools_cords",
+      "hazards_identified",
     ];
 
     for (const field of checklistFields) {
@@ -284,18 +323,20 @@ class SubmissionService {
     }
 
     const { data: updatedSub, error: updateError } = await supabaseAdmin
-      .from('submissions')
+      .from("submissions")
       .update(updates)
-      .eq('id', submissionId)
-      .select(`
+      .eq("id", submissionId)
+      .select(
+        `
         *,
         worker:users(id, full_name, email, role),
         site:sites(id, name, address)
-      `)
+      `,
+      )
       .single();
 
     if (updateError) {
-      throw new Error('Failed to update submission');
+      throw new Error("Failed to update submission");
     }
 
     return updatedSub;

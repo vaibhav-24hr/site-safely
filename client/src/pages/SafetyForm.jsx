@@ -38,7 +38,7 @@ const SafetyForm = () => {
         const response = await api.get("/sites");
         setSites(response.data.sites.filter((s) => s.active));
       } catch (err) {
-        console.error('Failed to load active job sites', err);
+        console.error("Failed to load active job sites", err);
         setError("Failed to load active job sites.");
       } finally {
         setLoadingSites(false);

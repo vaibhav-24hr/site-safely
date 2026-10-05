@@ -70,7 +70,7 @@
     align-items: flex-start;
     gap: var(--spacing-3);
   }
-  
+
   .toggle-button {
     align-self: flex-end;
   }

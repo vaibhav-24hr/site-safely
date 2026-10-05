@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import api from '../services/api';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+import api from "../services/api";
 
 const AuthContext = createContext();
 
@@ -16,14 +16,14 @@ export const AuthProvider = ({ children }) => {
   const handleSession = async (session) => {
     try {
       // The session user only contains basic auth info. Fetch profile and role from backend API
-      const response = await api.get('/auth/me');
+      const response = await api.get("/auth/me");
       setUser(response.data.user);
       setRole(response.data.user.role);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error("Error fetching user profile:", error);
       // Fallback to user metadata if backend is unreachable
       setUser(session.user);
-      setRole(session.user?.user_metadata?.role || 'framer');
+      setRole(session.user?.user_metadata?.role || "framer");
     } finally {
       setLoading(false);
     }
@@ -32,8 +32,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Fetch initial session
     const initializeAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (session) {
         await handleSession(session);
       } else {
@@ -46,14 +48,14 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           await handleSession(session);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === "SIGNED_OUT") {
           setUser(null);
           setRole(null);
           setLoading(false);
         }
-      }
+      },
     );
 
     return () => {
@@ -80,7 +82,7 @@ export const AuthProvider = ({ children }) => {
     role,
     login,
     logout,
-    loading
+    loading,
   };
 
   return (

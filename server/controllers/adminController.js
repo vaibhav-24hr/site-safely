@@ -1,4 +1,4 @@
-const adminService = require('../services/adminService');
+const adminService = require("../services/adminService");
 
 class AdminController {
   async getSummary(req, res, next) {
@@ -16,7 +16,7 @@ class AdminController {
       const submissions = await adminService.getAdminSubmissions({
         site_id,
         worker_id,
-        date
+        date,
       });
       res.status(200).json({ submissions });
     } catch (error) {
@@ -26,7 +26,9 @@ class AdminController {
 
   async getSubmissionById(req, res, next) {
     try {
-      const submission = await adminService.getAdminSubmissionById(req.params.id);
+      const submission = await adminService.getAdminSubmissionById(
+        req.params.id,
+      );
       res.status(200).json(submission);
     } catch (error) {
       next(error);

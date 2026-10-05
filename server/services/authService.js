@@ -1,4 +1,4 @@
-const { supabase, supabaseAdmin } = require('../db/supabaseClient');
+const { supabase, supabaseAdmin } = require("../db/supabaseClient");
 
 /**
  * Authentication Service
@@ -10,7 +10,7 @@ class AuthService {
    */
   async login(email, password) {
     if (!email || !password) {
-      const error = new Error('Email and password are required');
+      const error = new Error("Email and password are required");
       error.status = 400;
       throw error;
     }
@@ -18,11 +18,11 @@ class AuthService {
     // Authenticate with Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
-      password
+      password,
     });
 
     if (error || !data.session) {
-      const authErr = new Error(error?.message || 'Invalid email or password');
+      const authErr = new Error(error?.message || "Invalid email or password");
       authErr.status = 401;
       throw authErr;
     }
@@ -31,23 +31,23 @@ class AuthService {
 
     // Fetch user role & profile from public.users
     let { data: profile } = await supabaseAdmin
-      .from('users')
-      .select('id, email, full_name, role')
-      .eq('id', authUser.id)
+      .from("users")
+      .select("id, email, full_name, role")
+      .eq("id", authUser.id)
       .single();
 
     if (!profile) {
       // Create user profile if missing
-      const role = authUser.user_metadata?.role || 'framer';
-      const fullName = authUser.user_metadata?.full_name || 'Worker';
+      const role = authUser.user_metadata?.role || "framer";
+      const fullName = authUser.user_metadata?.full_name || "Worker";
 
       const { data: createdProfile } = await supabaseAdmin
-        .from('users')
+        .from("users")
         .upsert({
           id: authUser.id,
           email: authUser.email,
           full_name: fullName,
-          role: role
+          role: role,
         })
         .select()
         .single();
@@ -56,13 +56,13 @@ class AuthService {
         id: authUser.id,
         email: authUser.email,
         full_name: fullName,
-        role: role
+        role: role,
       };
     }
 
     return {
       token: session.access_token,
-      user: profile
+      user: profile,
     };
   }
 
@@ -71,13 +71,13 @@ class AuthService {
    */
   async getCurrentUser(userId) {
     const { data: profile, error } = await supabaseAdmin
-      .from('users')
-      .select('id, email, full_name, role, created_at')
-      .eq('id', userId)
+      .from("users")
+      .select("id, email, full_name, role, created_at")
+      .eq("id", userId)
       .single();
 
     if (error || !profile) {
-      const notFound = new Error('User profile not found');
+      const notFound = new Error("User profile not found");
       notFound.status = 404;
       throw notFound;
     }

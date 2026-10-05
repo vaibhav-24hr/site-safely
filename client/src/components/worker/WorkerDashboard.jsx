@@ -14,8 +14,8 @@ const WorkerDashboard = () => {
         const response = await api.get("/submissions");
         setSubmissions(response.data.submissions || []);
       } catch (err) {
-        console.error('Failed to load past submissions', err);
-        setError('Failed to load past submissions.');
+        console.error("Failed to load past submissions", err);
+        setError("Failed to load past submissions.");
       } finally {
         setLoading(false);
       }
@@ -149,7 +149,9 @@ const WorkerDashboard = () => {
                 >
                   <span>
                     {sub.submission_date
-                      ? new Date(sub.submission_date + 'T00:00:00').toLocaleDateString()
+                      ? new Date(
+                          sub.submission_date + "T00:00:00",
+                        ).toLocaleDateString()
                       : new Date(sub.created_at).toLocaleDateString()}
                   </span>
                   <span>

@@ -49,7 +49,7 @@ const Dashboard = () => {
 
       setSummary(summaryRes.data);
       setSubmissions(subsRes.data.submissions || []);
-      setMissingWorkers(missingRes.data || []);
+      setMissingWorkers(missingRes.data?.sites || []);
       setSites(sitesRes.data.sites || []);
     } catch (err) {
       setError("Failed to load dashboard data.");
@@ -236,7 +236,7 @@ const Dashboard = () => {
                 Missing Forms Today
               </p>
               <h2 style={{ margin: 0, color: "var(--color-ras-black)" }}>
-                {summary.missing_workers}
+                {summary.missing_submissions}
               </h2>
             </div>
           </div>
@@ -244,7 +244,7 @@ const Dashboard = () => {
       )}
 
       {/* Missing Workers Section */}
-      {missingWorkers.length > 0 && (
+      {missingWorkers.some((sg) => sg.missing_count > 0) && (
         <div
           className="card"
           style={{
@@ -271,7 +271,9 @@ const Dashboard = () => {
               gap: "1rem",
             }}
           >
-            {missingWorkers.map((siteGroup) => (
+            {missingWorkers
+              .filter((sg) => sg.missing_count > 0)
+              .map((siteGroup) => (
               <div
                 key={siteGroup.site_id}
                 style={{
@@ -292,7 +294,9 @@ const Dashboard = () => {
                 <ul
                   style={{ margin: 0, paddingLeft: "1.5rem", color: "#6b7280" }}
                 >
-                  {siteGroup.missing.map((user) => (
+                  {siteGroup.workers
+                    .filter((user) => !user.submitted)
+                    .map((user) => (
                     <li key={user.id}>
                       {user.full_name} ({user.email})
                     </li>
