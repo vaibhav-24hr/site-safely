@@ -38,6 +38,21 @@ class SubmissionService {
 
     const today = new Date().toISOString().split("T")[0];
 
+    // Check for duplicate submission today
+    const { data: existingSub } = await supabaseAdmin
+      .from("submissions")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("site_id", site_id)
+      .eq("submission_date", today)
+      .single();
+
+    if (existingSub) {
+      const err = new Error("You have already submitted a safety form for this site today.");
+      err.status = 409;
+      throw err;
+    }
+
     // Insert safety submission (booleans already parsed by validationMiddleware)
     const { data: submission, error: subError } = await supabaseAdmin
       .from("submissions")
