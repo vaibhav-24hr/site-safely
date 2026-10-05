@@ -20,6 +20,7 @@ class SubmissionService {
       tools_cords,
       hazards_identified,
       notes,
+      submission_date,
     } = submissionData;
 
     // Verify site exists and is active
@@ -36,19 +37,19 @@ class SubmissionService {
       throw err;
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const targetDate = submission_date || new Date().toISOString().split("T")[0];
 
-    // Check for duplicate submission today
+    // Check for duplicate submission for this date
     const { data: existingSub } = await supabaseAdmin
       .from("submissions")
       .select("id")
       .eq("user_id", userId)
       .eq("site_id", site_id)
-      .eq("submission_date", today)
+      .eq("submission_date", targetDate)
       .single();
 
     if (existingSub) {
-      const err = new Error("You have already submitted a safety form for this site today.");
+      const err = new Error(`You have already submitted a safety form for this site on ${targetDate}.`);
       err.status = 409;
       throw err;
     }
@@ -59,7 +60,7 @@ class SubmissionService {
       .insert({
         user_id: userId,
         site_id: site_id,
-        submission_date: today,
+        submission_date: targetDate,
         ppe_hard_hat: Boolean(ppe_hard_hat),
         ppe_vest: Boolean(ppe_vest),
         ppe_boots: Boolean(ppe_boots),

@@ -32,6 +32,7 @@ const SafetyForm = () => {
 
   const [formData, setFormData] = useState({
     site_id: "",
+    submission_date: new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }), // en-CA gives YYYY-MM-DD
     notes: "",
     checklist: CHECKLIST_ITEMS.reduce((acc, item) => {
       acc[item.id] = true; // Default to safe/true
@@ -77,6 +78,7 @@ const SafetyForm = () => {
     try {
       const formPayload = new FormData();
       formPayload.append("site_id", formData.site_id);
+      formPayload.append("submission_date", formData.submission_date);
       formPayload.append("notes", formData.notes);
 
       Object.entries(formData.checklist).forEach(([key, value]) => {
@@ -170,6 +172,24 @@ const SafetyForm = () => {
                 ))}
               </select>
             )}
+          </div>
+
+          {/* Date Selection */}
+          <div className="form-group" style={{ marginBottom: "2rem" }}>
+            <label className="form-label" htmlFor="submission_date">
+              Submission Date *
+            </label>
+            <input
+              type="date"
+              id="submission_date"
+              className="form-input"
+              value={formData.submission_date}
+              max={new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" })}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, submission_date: e.target.value }))
+              }
+              required
+            />
           </div>
 
           {/* Checklist */}
