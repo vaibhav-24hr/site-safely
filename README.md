@@ -9,12 +9,7 @@
 * **Web Application:** [https://site-safety-psi.vercel.app](https://site-safety-psi.vercel.app)
 * **REST API Health:** [https://site-safely-api.onrender.com/api/health](https://site-safely-api.onrender.com/api/health)
 
-### Demo Accounts
 
-| Role | Email | Password | Access Scope |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@sitesafety.com` | `demo1234` | Full metrics dashboard, site filters, missing worker tracking |
-| **Worker** | `john@sitesafety.com` | `demo1234` | Daily checklist submission, photo upload, personal history |
 
 ---
 
@@ -43,18 +38,18 @@ Construction teams frequently struggle with fragmented paper safety forms, unorg
 
 ## Architecture Overview
 
-```
-Browser (React Client)
-   │
-   ▼ HTTP / REST (JWT Bearer Token)
-Express.js REST API
-   ├── Routes      (URL mapping & middleware execution)
-   ├── Controllers (Request parsing & response dispatching)
-   ├── Services    (Business logic & authorization rules)
-   └── DB Layer    (Supabase client & SQL execution)
-   │
-   ▼
-PostgreSQL & Supabase Storage
+```mermaid
+graph TD
+    Client[Browser / React Client] -- HTTP / REST <br> JWT Bearer Token --> API[Express.js REST API]
+    
+    subgraph Express Server Architecture
+        API --> Routes[Routes: URL mapping & middleware]
+        Routes --> Controllers[Controllers: Request parsing & dispatching]
+        Controllers --> Services[Services: Business logic & auth rules]
+        Services --> DBLayer[DB Layer: Supabase client & SQL execution]
+    end
+    
+    DBLayer -- SQL & Supabase SDK --> DB[(PostgreSQL & Supabase Storage)]
 ```
 
 * **Entity-Relationship Diagram (ERD):** [View the full database schema and ERD here](ERD.md).
