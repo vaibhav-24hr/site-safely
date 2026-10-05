@@ -146,8 +146,8 @@ The standardized safety checklist validates 8 essential site safety standards:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vaibhav-24hr/site-safely-dummy.git
-cd site-safely-dummy
+git clone https://github.com/vaibhav-24hr/site-safely.git
+cd site-safely
 ```
 
 ### 2. Configure Environment Variables
