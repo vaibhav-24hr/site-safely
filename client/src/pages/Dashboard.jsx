@@ -71,11 +71,14 @@ const Dashboard = () => {
   });
 
   const uniqueWorkersMap = new Map();
+  submissions.forEach(sub => {
+    const wId = sub.user_id || sub.worker?.id;
+    const wName = sub.worker?.full_name || sub.worker_name;
+    if (wId && wName) uniqueWorkersMap.set(wId, { id: wId, name: wName });
+  });
   missingWorkers.forEach(site => {
     site.workers.forEach(w => {
-      if (w.name) {
-        uniqueWorkersMap.set(w.id, { id: w.id, name: w.name });
-      }
+      if (w.full_name) uniqueWorkersMap.set(w.id, { id: w.id, name: w.full_name });
     });
   });
   const uniqueWorkers = [...uniqueWorkersMap.values()].sort((a, b) => a.name.localeCompare(b.name));
