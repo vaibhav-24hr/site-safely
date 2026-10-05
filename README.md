@@ -111,9 +111,27 @@ The standardized safety checklist validates 8 essential site safety standards:
 * **Authentication:** Token-based authentication using Supabase JWTs attached via custom Axios request interceptors.
 * **Role-Based Access Control:**
   * `framer` (Worker): Can only submit new assessments and view their own past submissions.
-  * `admin`: Complete visibility across all sites, aggregated analytics, multi-factor filtering, and missing worker tracking.
+  * `admin`: Complete visibility across all sites, aggregated analytics, multi-field filtering, and missing worker tracking.
 * **Row-Level Security (RLS):** PostgreSQL policies guarantee data isolation directly at the database engine level.
 * **Server-Side Validation:** Rigid verification of required boolean checklist fields, site active status, and image file types.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/login` | Authenticate user & get JWT | Public |
+| **GET** | `/api/auth/me` | Get current user profile | Worker / Admin |
+| **GET** | `/api/sites` | List active job sites | Worker / Admin |
+| **POST** | `/api/submissions` | Create safety form (w/ photos) | Worker / Admin |
+| **GET** | `/api/submissions` | Get own past submissions | Worker / Admin |
+| **GET** | `/api/submissions/:id` | Get specific submission details | Worker / Admin |
+| **PUT** | `/api/submissions/:id` | Update submission details | Worker / Admin |
+| **DELETE**| `/api/submissions/:id` | Delete submission | Worker / Admin |
+| **GET** | `/api/admin/summary` | Dashboard stats (missing/active) | Admin |
+| **GET** | `/api/admin/submissions` | Filterable list of all submissions | Admin |
+| **GET** | `/api/admin/missing-workers`| Check which assigned workers are missing | Admin |
 
 ---
 
@@ -128,8 +146,8 @@ The standardized safety checklist validates 8 essential site safety standards:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vaibhav-24hr/site-safety-forms.git
-cd site-safety-forms
+git clone https://github.com/vaibhav-24hr/site-safely-dummy.git
+cd site-safely-dummy
 ```
 
 ### 2. Configure Environment Variables

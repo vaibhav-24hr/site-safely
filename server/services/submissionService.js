@@ -101,7 +101,9 @@ class SubmissionService {
 
         if (uploadError) {
           console.error("Failed to upload photo:", uploadError);
-          continue;
+          const err = new Error("Failed to upload one or more photos. Please try again.");
+          err.status = 500;
+          throw err;
         }
 
         // Get public URL
@@ -273,6 +275,17 @@ class SubmissionService {
     if (deleteError) {
       throw new Error("Failed to delete submission");
     }
+
+    // Cleanup: Remove all photos in this submission's storage folder
+    const { data: filesList } = await supabaseAdmin.storage
+      .from("safety-photos")
+      .list(submissionId);
+    
+    if (filesList && filesList.length > 0) {
+      const pathsToDelete = filesList.map(file => `${submissionId}/${file.name}`);
+      await supabaseAdmin.storage.from("safety-photos").remove(pathsToDelete);
+    }
+
     return { success: true };
   }
 
@@ -315,11 +328,14 @@ class SubmissionService {
 
     for (const field of checklistFields) {
       if (updateData[field] !== undefined) {
-        updates[field] = Boolean(updateData[field]);
+        let val = updateData[field];
+        if (val === "true") val = true;
+        if (val === "false") val = false;
+        updates[field] = Boolean(val);
       }
     }
     if (updateData.notes !== undefined) {
-      updates.notes = updateData.notes;
+      updates.notes = typeof updateData.notes === "string" ? updateData.notes.trim() : updateData.notes;
     }
 
     const { data: updatedSub, error: updateError } = await supabaseAdmin

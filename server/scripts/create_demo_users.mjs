@@ -26,10 +26,10 @@ async function createDemoUsers() {
       name: "Admin User",
     },
     {
-      email: "worker@sitesafety.com",
+      email: "john@sitesafety.com",
       password: "password123",
       role: "framer",
-      name: "Demo Worker",
+      name: "John Doe",
     },
   ];
 
