@@ -38,7 +38,7 @@ class AuthService {
 
     if (!profile) {
       // Create user profile if missing
-      const role = authUser.user_metadata?.role || "framer";
+      const role = "framer"; // SECURITY: Never trust user_metadata for role
       const fullName = authUser.user_metadata?.full_name || "Worker";
 
       const { data: createdProfile } = await supabaseAdmin
