@@ -176,7 +176,7 @@ const SubmissionDetails = () => {
                   fontSize: "0.875rem",
                 }}
               >
-                {new Date(submission.created_at).toLocaleString()}
+                {new Date(submission.created_at).toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}
               </p>
             </div>
             <div>

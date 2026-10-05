@@ -295,6 +295,8 @@ const SafetyForm = () => {
               {selectedPhotos.length < 5 && (
                 <label
                   style={{
+                    position: "relative",
+                    overflow: "hidden",
                     width: "100px",
                     height: "100px",
                     borderRadius: "var(--radius-md)",
@@ -314,6 +316,7 @@ const SafetyForm = () => {
                     type="file"
                     accept="image/*"
                     multiple
+                    aria-label="Upload site photos"
                     onChange={(e) => {
                       const files = Array.from(e.target.files);
                       if (selectedPhotos.length + files.length > 5) {
@@ -322,7 +325,7 @@ const SafetyForm = () => {
                       }
                       setSelectedPhotos((prev) => [...prev, ...files]);
                     }}
-                    style={{ display: "none" }}
+                    style={{ opacity: 0, position: "absolute", width: "100%", height: "100%", cursor: "pointer" }}
                   />
                 </label>
               )}

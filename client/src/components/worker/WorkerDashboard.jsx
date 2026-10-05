@@ -149,16 +149,11 @@ const WorkerDashboard = () => {
                 >
                   <span>
                     {sub.submission_date
-                      ? new Date(
-                          sub.submission_date + "T00:00:00",
-                        ).toLocaleDateString()
-                      : new Date(sub.created_at).toLocaleDateString()}
+                      ? new Date(sub.submission_date + "T00:00:00").toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })
+                      : new Date(sub.created_at).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
                   </span>
                   <span>
-                    {new Date(sub.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(sub.created_at).toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
               </div>

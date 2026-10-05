@@ -70,7 +70,15 @@ const Dashboard = () => {
     return true;
   });
 
-  const uniqueWorkers = [...new Map(submissions.map(item => [item.user_id || item.worker?.id, {id: item.user_id || item.worker?.id, name: item.worker?.full_name || item.worker_name}])).values()].filter(w => w.name);
+  const uniqueWorkersMap = new Map();
+  missingWorkers.forEach(site => {
+    site.workers.forEach(w => {
+      if (w.name) {
+        uniqueWorkersMap.set(w.id, { id: w.id, name: w.name });
+      }
+    });
+  });
+  const uniqueWorkers = [...uniqueWorkersMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
   const safeCount = filteredSubmissions.filter(s => s.all_safe).length;
   const hazardsCount = filteredSubmissions.length - safeCount;
@@ -446,14 +454,11 @@ const Dashboard = () => {
                         }}
                       >
                         {sub.submission_date
-                          ? new Date(sub.submission_date + 'T00:00:00').toLocaleDateString()
-                          : new Date(sub.created_at).toLocaleDateString()}
+                          ? new Date(sub.submission_date + 'T00:00:00').toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })
+                          : new Date(sub.created_at).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
                       </div>
                       <div style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-                        {new Date(sub.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(sub.created_at).toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit" })}
                       </div>
                     </td>
                     <td
