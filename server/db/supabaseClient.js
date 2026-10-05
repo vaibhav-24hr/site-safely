@@ -31,7 +31,7 @@ const supabase = createClient(
 // Admin client with service role key (bypasses RLS for server-side operations)
 const supabaseAdmin = createClient(
   supabaseUrl || "https://placeholder.supabase.co",
-  supabaseServiceRoleKey || supabaseAnonKey || "placeholder-service-key",
+  supabaseServiceRoleKey || "placeholder-service-key",
   clientOptions,
 );
 

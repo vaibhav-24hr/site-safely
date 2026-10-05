@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Error fetching user profile:", error);
       // Fallback to user metadata if backend is unreachable
       setUser(session.user);
-      setRole(session.user?.user_metadata?.role || "framer");
+      setRole("framer"); // SECURITY: Never trust user_metadata
     } finally {
       setLoading(false);
     }

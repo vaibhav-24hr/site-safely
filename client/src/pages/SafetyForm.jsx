@@ -22,6 +22,13 @@ const SafetyForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [photoPreviews, setPhotoPreviews] = useState([]);
+
+  useEffect(() => {
+    const urls = selectedPhotos.map((photo) => URL.createObjectURL(photo));
+    setPhotoPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [selectedPhotos]);
 
   const [formData, setFormData] = useState({
     site_id: "",
@@ -236,7 +243,7 @@ const SafetyForm = () => {
             </p>
 
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              {selectedPhotos.map((photo, index) => (
+              {photoPreviews.map((previewUrl, index) => (
                 <div
                   key={index}
                   style={{
@@ -249,7 +256,7 @@ const SafetyForm = () => {
                   }}
                 >
                   <img
-                    src={URL.createObjectURL(photo)}
+                    src={previewUrl}
                     alt="Preview"
                     style={{
                       width: "100%",

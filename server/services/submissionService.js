@@ -72,64 +72,75 @@ class SubmissionService {
       throw err;
     }
 
-    // Ensure worker is registered in user_sites for this site
-    const { error: userSiteError } = await supabaseAdmin
-      .from("user_sites")
-      .upsert({ user_id: userId, site_id: site_id });
+    try {
+      // Ensure worker is registered in user_sites for this site
+      const { error: userSiteError } = await supabaseAdmin
+        .from("user_sites")
+        .upsert({ user_id: userId, site_id: site_id });
 
-    if (userSiteError) {
-      console.warn(
-        "Non-critical: user_site link skipped:",
-        userSiteError.message,
-      );
-    }
+      if (userSiteError) {
+        throw new Error(`Failed to assign worker to site: ${userSiteError.message}`);
+      }
 
-    // Handle photo uploads to Supabase Storage
-    if (files && files.length > 0) {
-      const photoRecords = [];
-      for (const file of files) {
-        // Generate unique filename
-        const ext = file.originalname.split(".").pop() || "jpg";
-        const fileName = `${submission.id}/${Date.now()}-${Math.round(Math.random() * 1000)}.${ext}`;
+      // Handle photo uploads to Supabase Storage
+      if (files && files.length > 0) {
+        const photoRecords = [];
+        for (const file of files) {
+          // Generate unique filename
+          const ext = file.originalname.split(".").pop() || "jpg";
+          const fileName = `${submission.id}/${Date.now()}-${Math.round(Math.random() * 1000)}.${ext}`;
 
-        // Upload to Supabase Storage
-        const { data, error: uploadError } = await supabaseAdmin.storage
-          .from("safety-photos")
-          .upload(fileName, file.buffer, {
-            contentType: file.mimetype,
+          // Upload to Supabase Storage
+          const { data, error: uploadError } = await supabaseAdmin.storage
+            .from("safety-photos")
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+            });
+
+          if (uploadError) {
+            throw new Error(`Failed to upload photo: ${uploadError.message}`);
+          }
+
+          // Get public URL
+          const { data: publicUrlData } = supabaseAdmin.storage
+            .from("safety-photos")
+            .getPublicUrl(fileName);
+
+          photoRecords.push({
+            submission_id: submission.id,
+            url: publicUrlData.publicUrl,
+            file_name: file.originalname,
+            file_type: file.mimetype,
+            file_size: file.size,
           });
-
-        if (uploadError) {
-          console.error("Failed to upload photo:", uploadError);
-          const err = new Error("Failed to upload one or more photos. Please try again.");
-          err.status = 500;
-          throw err;
         }
 
-        // Get public URL
-        const { data: publicUrlData } = supabaseAdmin.storage
-          .from("safety-photos")
-          .getPublicUrl(fileName);
+        // Insert records into photos table
+        if (photoRecords.length > 0) {
+          const { error: dbError } = await supabaseAdmin
+            .from("photos")
+            .insert(photoRecords);
 
-        photoRecords.push({
-          submission_id: submission.id,
-          url: publicUrlData.publicUrl,
-          file_name: file.originalname,
-          file_type: file.mimetype,
-          file_size: file.size,
-        });
-      }
-
-      // Insert records into photos table
-      if (photoRecords.length > 0) {
-        const { error: dbError } = await supabaseAdmin
-          .from("photos")
-          .insert(photoRecords);
-
-        if (dbError) {
-          console.error("Failed to save photo records to database:", dbError);
+          if (dbError) {
+            throw new Error(`Failed to save photo records: ${dbError.message}`);
+          }
         }
       }
+    } catch (err) {
+      // Rollback: delete submission (cascade handles photos in DB)
+      await supabaseAdmin.from("submissions").delete().eq("id", submission.id);
+      
+      // Rollback: delete photos in storage
+      const { data: filesList } = await supabaseAdmin.storage
+        .from("safety-photos")
+        .list(submission.id);
+      if (filesList && filesList.length > 0) {
+        const pathsToDelete = filesList.map(file => `${submission.id}/${file.name}`);
+        await supabaseAdmin.storage.from("safety-photos").remove(pathsToDelete);
+      }
+      
+      err.status = 500;
+      throw err;
     }
 
     return submission;
