@@ -176,7 +176,21 @@ const SubmissionDetails = () => {
                   fontSize: "0.875rem",
                 }}
               >
-                {new Date(submission.created_at).toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}
+                Submission Date:{" "}
+                <strong style={{ color: "var(--color-ras-dark)" }}>
+                  {submission.submission_date
+                    ? new Date(submission.submission_date + "T00:00:00").toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })
+                    : new Date(submission.created_at).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
+                </strong>
+              </p>
+              <p
+                style={{
+                  color: "#9ca3af",
+                  margin: "0.25rem 0 0",
+                  fontSize: "0.75rem",
+                }}
+              >
+                Logged at: {new Date(submission.created_at).toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}
               </p>
             </div>
             <div>

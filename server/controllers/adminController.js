@@ -1,6 +1,15 @@
 const adminService = require("../services/adminService");
 
 class AdminController {
+  async getWorkers(req, res, next) {
+    try {
+      const workers = await adminService.getWorkers();
+      res.status(200).json({ workers });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getSummary(req, res, next) {
     try {
       const summary = await adminService.getAdminSummary();

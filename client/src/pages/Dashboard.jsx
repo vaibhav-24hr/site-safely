@@ -9,8 +9,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import api from "../services/api";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [summary, setSummary] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [missingWorkers, setMissingWorkers] = useState([]);
+  const [allWorkers, setAllWorkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,17 +41,19 @@ const Dashboard = () => {
       const query = params.toString() ? `?${params.toString()}` : "";
 
       // Run fetches in parallel
-      const [summaryRes, subsRes, missingRes, sitesRes] = await Promise.all([
+      const [summaryRes, subsRes, missingRes, sitesRes, workersRes] = await Promise.all([
         api.get("/admin/summary"),
         api.get(`/admin/submissions${query}`),
         api.get("/admin/missing-workers"),
         api.get("/sites"), // get active sites for the dropdown
+        api.get("/admin/workers"), // get all workers
       ]);
 
       setSummary(summaryRes.data);
       setSubmissions(subsRes.data.submissions || []);
       setMissingWorkers(missingRes.data?.sites || []);
       setSites(sitesRes.data.sites || []);
+      setAllWorkers(workersRes.data.workers || []);
     } catch (err) {
       setError("Failed to load dashboard data.");
       console.error(err);
@@ -64,33 +67,42 @@ const Dashboard = () => {
   }, [fetchData]); // Refetch when filters change
 
   const filteredSubmissions = submissions.filter((sub) => {
-    if (workerFilter && sub.worker?.id !== workerFilter && sub.user_id !== workerFilter) return false;
+    if (
+      workerFilter &&
+      sub.worker?.id !== workerFilter &&
+      sub.user_id !== workerFilter
+    )
+      return false;
     if (statusFilter === "safe" && !sub.all_safe) return false;
     if (statusFilter === "hazards" && sub.all_safe) return false;
     return true;
   });
 
   const uniqueWorkersMap = new Map();
-  submissions.forEach(sub => {
+  allWorkers.forEach((w) => {
+    uniqueWorkersMap.set(w.id, { id: w.id, name: w.full_name });
+  });
+  // Also include any workers who might be soft-deleted but have submissions
+  submissions.forEach((sub) => {
     const wId = sub.user_id || sub.worker?.id;
     const wName = sub.worker?.full_name || sub.worker_name;
-    if (wId && wName) uniqueWorkersMap.set(wId, { id: wId, name: wName });
+    if (wId && wName && !uniqueWorkersMap.has(wId)) {
+      uniqueWorkersMap.set(wId, { id: wId, name: wName });
+    }
   });
-  missingWorkers.forEach(site => {
-    site.workers.forEach(w => {
-      if (w.full_name) uniqueWorkersMap.set(w.id, { id: w.id, name: w.full_name });
-    });
-  });
-  const uniqueWorkers = [...uniqueWorkersMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-  const safeCount = filteredSubmissions.filter(s => s.all_safe).length;
+  const uniqueWorkers = [...uniqueWorkersMap.values()].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+
+  const safeCount = filteredSubmissions.filter((s) => s.all_safe).length;
   const hazardsCount = filteredSubmissions.length - safeCount;
   const chartData = {
-    labels: ['Safe', 'Hazards'],
+    labels: ["Safe", "Hazards"],
     datasets: [
       {
         data: [safeCount, hazardsCount],
-        backgroundColor: ['#10b981', '#f0523d'],
+        backgroundColor: ["#10b981", "#f0523d"],
         borderWidth: 0,
       },
     ],
@@ -285,36 +297,40 @@ const Dashboard = () => {
             {missingWorkers
               .filter((sg) => sg.missing_count > 0)
               .map((siteGroup) => (
-              <div
-                key={siteGroup.site_id}
-                style={{
-                  backgroundColor: "white",
-                  padding: "1rem",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid #e5e7eb",
-                }}
-              >
-                <h4
+                <div
+                  key={siteGroup.site_id}
                   style={{
-                    margin: "0 0 0.5rem",
-                    color: "var(--color-ras-dark)",
+                    backgroundColor: "white",
+                    padding: "1rem",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid #e5e7eb",
                   }}
                 >
-                  {siteGroup.site_name}
-                </h4>
-                <ul
-                  style={{ margin: 0, paddingLeft: "1.5rem", color: "#6b7280" }}
-                >
-                  {siteGroup.workers
-                    .filter((user) => !user.submitted)
-                    .map((user) => (
-                    <li key={user.id}>
-                      {user.full_name} ({user.email})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                  <h4
+                    style={{
+                      margin: "0 0 0.5rem",
+                      color: "var(--color-ras-dark)",
+                    }}
+                  >
+                    {siteGroup.site_name}
+                  </h4>
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: "1.5rem",
+                      color: "#6b7280",
+                    }}
+                  >
+                    {siteGroup.workers
+                      .filter((user) => !user.submitted)
+                      .map((user) => (
+                        <li key={user.id}>
+                          {user.full_name} ({user.email})
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -383,15 +399,22 @@ const Dashboard = () => {
         </div>
 
         {filteredSubmissions.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem', height: '200px' }}>
-            <Pie 
-              data={chartData} 
-              options={{ 
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "2rem",
+              height: "200px",
+            }}
+          >
+            <Pie
+              data={chartData}
+              options={{
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { position: 'right' }
-                }
-              }} 
+                  legend: { position: "right" },
+                },
+              }}
             />
           </div>
         )}
@@ -457,11 +480,22 @@ const Dashboard = () => {
                         }}
                       >
                         {sub.submission_date
-                          ? new Date(sub.submission_date + 'T00:00:00').toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })
-                          : new Date(sub.created_at).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
+                          ? new Date(
+                              sub.submission_date + "T00:00:00",
+                            ).toLocaleDateString("en-US", {
+                              timeZone: "America/Los_Angeles",
+                            })
+                          : new Date(sub.created_at).toLocaleDateString(
+                              "en-US",
+                              { timeZone: "America/Los_Angeles" },
+                            )}
                       </div>
                       <div style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-                        {new Date(sub.created_at).toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(sub.created_at).toLocaleTimeString("en-US", {
+                          timeZone: "America/Los_Angeles",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                     </td>
                     <td

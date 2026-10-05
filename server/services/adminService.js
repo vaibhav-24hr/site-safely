@@ -7,6 +7,20 @@ const { supabaseAdmin } = require("../db/supabaseClient");
  */
 class AdminService {
   /**
+   * Get all workers (role = framer)
+   */
+  async getWorkers() {
+    const { data, error } = await supabaseAdmin
+      .from("users")
+      .select("id, full_name, email")
+      .eq("role", "framer")
+      .order("full_name", { ascending: true });
+      
+    if (error) throw error;
+    return data;
+  }
+
+  /**
    * Get summary dashboard statistics
    */
   async getAdminSummary() {

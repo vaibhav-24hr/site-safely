@@ -13,6 +13,9 @@ router.use(authMiddleware, adminMiddleware);
 // GET /api/admin/summary - Top-level dashboard summary cards
 router.get("/summary", adminController.getSummary);
 
+// GET /api/admin/workers - Get all workers
+router.get("/workers", adminController.getWorkers);
+
 // GET /api/admin/submissions - Filterable list of all submissions
 router.get("/submissions", adminController.getSubmissions);
 
